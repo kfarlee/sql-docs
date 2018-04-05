@@ -136,8 +136,6 @@ manager: "jhubbard"
   
 ### Limitations  
   
--   MERGE is disabled when a btree index is defined on a clustered columnstore index.  
-  
 -   For in-memory tables, a columnstore index must include all the columns; the columnstore index cannot have a filtered condition.  
   
 -   For in-memory tables, queries on columnstore indexes run only in InterOP mode, and not in the in-memory native mode. Parallel execution is supported.  
