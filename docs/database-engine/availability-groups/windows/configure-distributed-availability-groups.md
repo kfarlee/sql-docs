@@ -222,15 +222,19 @@ ALTER DATABASE [db1] SET HADR AVAILABILITY GROUP = [ag2];
 
 Only manual failover is supported at this time. To manually fail over a distributed availability group:
 
-1. To ensure that no data is lost, stop all transactions on the global primary databases (that is, databases of the primary availability group), then set the distributed availability group to synchronous commit.
+
+In order to ensure that there is no data loss during the failover, the most conservative approach would be to stop update transactions for the duration of the failover.  In cases where this is not feasible for whatever reason, the following would be a safe alternative:
+
+1. To ensure that no data is lost, it is recommended but not required to stop all transactions on the global primary databases (that is, databases of the primary availability group), then set the distributed availability group to synchronous commit.
 1. Wait until the distributed availability group is synchronized and has the same last_hardened_lsn per database. 
 1. On the global primary replica, set the distributed availability group role to `SECONDARY`.
 1. Test failover readiness.
+    1. If the replicas are not ready to failover, on the original Primary replica, set the distributed availability group role back to `PRIMARY` and start this process over.
 1. Fail over the primary availability group.
 
 The following Transact-SQL examples demonstrate the detailed steps to fail over the distributed availability group named `distributedag`:
 
-1. To ensure that no data is lost, stop all transactions on the global primary databases (that is, databases of the primary availability group). Then set the distributed availability group to synchronous commit by running the following code on *both* the global primary and the forwarder.   
+1. To ensure that no data is lost, if possible, stop all transactions on the global primary databases (that is, databases of the primary availability group). Then set the distributed availability group to synchronous commit by running the following code on *both* the global primary and the forwarder.   
     
       ```sql  
       -- sets the distributed availability group to synchronous commit 
@@ -314,7 +318,6 @@ The following Transact-SQL examples demonstrate the detailed steps to fail over 
 
     ALTER AVAILABILITY GROUP distributedag FORCE_FAILOVER_ALLOW_DATA_LOSS; 
     ```
-
 
 1. Fail over from the primary availability group to the secondary availability group. Run the following command on the forwarder, the SQL Server that hosts the primary replica of the secondary availability group. 
 
